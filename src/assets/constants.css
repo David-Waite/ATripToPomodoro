@@ -1,0 +1,86 @@
+:root {
+  --white: #f3f5f2;
+  --grey: #a2a2a2;
+  --green: #6bc198;
+  --red: #ff4949;
+  --gold: #cbad43;
+  /* LIGHT MODE */
+  --primary: #fe9072;
+  --background: #f6e6d2;
+  --backgroundBorder: #b78058;
+  --textPrimary: #b78058;
+
+  /* SHOP COLOURS */
+  --cardBorder: #fe9072;
+  --cardFilling: #fdbba1;
+  /* DARK MODE */
+  --DMprimary: #fe9072;
+  --DMbackground: #14171e;
+  --DMbackgroundBorder: #343b4a;
+  --DMtextPrimary: #b78058;
+
+  /* SHOP COLOURS */
+  --DMcardBorder: #343434;
+  --DMcardFilling: #151618;
+}
+@font-face {
+  font-family: "RobotoMono";
+  src: url("@/assets/fonts/RobotoMono-Thin.ttf");
+  font-weight: 100;
+}
+
+@font-face {
+  font-family: "RobotoMono";
+  src: url("@/assets/fonts/RobotoMono-ExtraLight.ttf");
+  font-weight: 200;
+}
+
+@font-face {
+  font-family: "RobotoMono";
+  src: url("@/assets/fonts/RobotoMono-Light.ttf");
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: "RobotoMono";
+  src: url("@/assets/fonts/RobotoMono-Regular.ttf");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "RobotoMono";
+  src: url("@/assets/fonts/RobotoMono-Medium.ttf");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "RobotoMono";
+  src: url("@/assets/fonts/RobotoMono-SemiBold.ttf");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "RobotoMono";
+  src: url("@/assets/fonts/RobotoMono-Bold.ttf");
+  font-weight: 700;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: var(--vt-c-black);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: RobotoMono;
+  font-weight: 400;
+  overflow: hidden;
+}
