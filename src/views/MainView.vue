@@ -58,7 +58,6 @@ export default {
         await updateDoc(this.currentUserDocRef, {
           vehiclesOwned: vechiclesToBeAdded,
         });
-        this.fetchUser(); //CHECK TO SEE IF I NEED THIS, IDEA IS THAT YOULL NEED TO REFRESH IF YOUR ADDING A VEHILE
       }
     },
 

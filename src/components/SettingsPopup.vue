@@ -5,32 +5,42 @@ import { BIconXLg } from "bootstrap-icons-vue";
 <template>
   <PopupCard>
     <div class="header">
-      <h2>Account name: {{ username }}</h2>
+      <h2>Username: {{ username }}</h2>
       <h1>SETTINGS</h1>
       <BIconXLg />
     </div>
 
     <div class="timerSettings">
-      <h3>Timer Settings:</h3>
-      <div>
-        <label for="focus">Focus:</label>
-        <input
-          type="text"
-          id="focus"
-          v-model="focus"
-          @input="enterTime"
-          ref="focusInput"
-        />
+      <h3>Timer Settings</h3>
+
+      <div class="timeSettingContainer">
+        <h4>Focus:</h4>
+        <input id="focusHours" type="text" />
+        <label for="focusHours">h</label><span>:</span>
+        <input id="focusMinutes" type="text" />
+        <label for="focusMinutes">m</label><span>:</span>
+        <input id="focusSeconds" type="text" />
+        <label for="focusSeconds">s</label>
       </div>
-      <div>
-        <label for="shortRest">Short rest:</label>
-        <input type="text" id="shortRest" v-model="shortRest" />
+      <div class="timeSettingContainer">
+        <h4>Short rest:</h4>
+        <input id="focusHours" type="text" />
+        <label for="focusHours">h</label><span>:</span>
+        <input id="focusMinutes" type="text" />
+        <label for="focusMinutes">m</label><span>:</span>
+        <input id="focusSeconds" type="text" />
+        <label for="focusSeconds">s</label>
       </div>
-      <div>
-        <label for="longRest">Long Rest:</label>
-        <input type="text" id="longRest" v-model="longRest" />
+      <div class="timeSettingContainer">
+        <h4>Long rest:</h4>
+        <input id="focusHours" type="text" />
+        <label for="focusHours">h</label><span>:</span>
+        <input id="focusMinutes" type="text" />
+        <label for="focusMinutes">m</label><span>:</span>
+        <input id="focusSeconds" type="text" />
+        <label for="focusSeconds">s</label>
       </div>
-      <div>
+      <div class="focusTilLongRestContainer">
         <label for="focusTilLongRest">focus period's until long rest:</label>
         <input type="text" id="focusTilLongRest" v-model="focusTilLongRest" />
       </div>
@@ -56,41 +66,8 @@ export default {
       timeInputPlaceHolder: "",
     };
   },
-  methods: {
-    enterTime() {
-      let caretPosition = this.$refs.focusInput.selectionStart;
-      //doing the minut
-      this.focus =
-        this.focus.slice(0, caretPosition) +
-        this.focus.slice(caretPosition + 1);
-      console.log(caretPosition);
-
-      this.$nextTick(() => {
-        this.$refs.focusInput.focus();
-        this.$refs.focusInput.setSelectionRange(caretPosition, caretPosition);
-      });
-      // var regex = /^[0-9:]*$/;
-      // if (!regex.test(this.focus)) {
-      //   // If the input does not match the pattern, clear it
-      //   this.focus = this.focus.slice(0, -1);
-      // }
-    },
-  },
-  mounted() {
-    let totalSeconds = this.settings.focus;
-    let hours = Math.floor(totalSeconds / 3600);
-    totalSeconds %= 3600;
-    let minutes = Math.floor(totalSeconds / 60);
-    let seconds = totalSeconds % 60;
-
-    let hoursStr = String(hours).padStart(2, "0");
-    let minutesStr = String(minutes).padStart(2, "0");
-    let secondsStr = String(seconds).padStart(2, "0");
-
-    let timeStr = `${hoursStr}h:${minutesStr}m:${secondsStr}s`;
-
-    this.focus = timeStr;
-  },
+  methods: {},
+  mounted() {},
 };
 </script>
 <style scoped>
@@ -99,20 +76,100 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 40px;
 }
 .header h1 {
   position: absolute;
-  font-size: 16px;
 
   left: 50%;
   transform: translateX(-50%);
 }
+
 .header h1,
 .header h2,
 .header svg {
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 500;
   color: var(--textPrimary);
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--textPrimary);
+}
+
+.timerSettings {
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-weight: 400;
+}
+.timeSettingContainer {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.timeSettingContainer h4 {
+  font-weight: 500;
+  color: var(--textPrimary);
+  margin-right: auto;
+  font-size: 16px;
+}
+.timeSettingContainer input {
+  width: 30px;
+  font-size: 16px;
+  background-color: var(--primary);
+  color: var(--background);
+  border: none;
+  border-radius: 6px 0px 0px 6px;
+  font-weight: 500;
+  font-family: RobotoMono;
+  padding-right: 2px;
+  text-align: end;
+}
+.timeSettingContainer input:focus {
+  outline-style: none;
+}
+
+.timeSettingContainer label {
+  background-color: var(--primary);
+  border: none;
+  border-radius: 0px 6px 6px 0px;
+  color: var(--background);
+  padding-right: 8px;
+  margin-left: -1px;
+}
+
+.timeSettingContainer span {
+  color: var(--primary);
+  width: 16px;
+  text-align: center;
+}
+
+.focusTilLongRestContainer label {
+  font-weight: 500;
+  color: var(--textPrimary);
+  margin-right: auto;
+  font-size: 16px;
+}
+.focusTilLongRestContainer {
+  display: flex;
+}
+.focusTilLongRestContainer input {
+  width: 30px;
+  font-size: 16px;
+  background-color: var(--primary);
+  color: var(--background);
+  border: none;
+  border-radius: 6px;
+  font-family: RobotoMono;
+  font-weight: 500;
+
+  text-align: center;
 }
 </style>
 <!-- this.$nextTick(() => {
