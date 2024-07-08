@@ -16,8 +16,10 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: var(--background);
-  border: 6px solid var(--backgroundBorder);
+  border: 4px solid var(--backgroundBorder);
   border-radius: 40px;
   padding: 40px;
+  display: flex;
+  flex-direction: column;
 }
 </style>

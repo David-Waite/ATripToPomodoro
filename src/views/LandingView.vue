@@ -115,9 +115,9 @@ export default {
           username: this.username,
           email: this.email,
           settings: {
-            focus: 0.15,
-            shortRest: 0.1,
-            longRest: 30,
+            focus: 1500,
+            shortRest: 300,
+            longRest: 3600,
             focusTilLongRest: 4,
           },
           timeStudying: 0,
@@ -127,6 +127,7 @@ export default {
               price: 0,
               status: "equipped",
             },
+            1,
           ],
         });
 

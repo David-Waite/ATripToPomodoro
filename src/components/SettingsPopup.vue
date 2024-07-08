@@ -15,29 +15,45 @@ import { BIconXLg } from "bootstrap-icons-vue";
 
       <div class="timeSettingContainer">
         <h4>Focus:</h4>
-        <input id="focusHours" type="text" />
+        <input id="focusHours" type="text" v-model="formattedFocus.hours" />
         <label for="focusHours">h</label><span>:</span>
-        <input id="focusMinutes" type="text" />
+        <input id="focusMinutes" type="text" v-model="formattedFocus.minutes" />
         <label for="focusMinutes">m</label><span>:</span>
-        <input id="focusSeconds" type="text" />
+        <input id="focusSeconds" type="text" v-model="formattedFocus.seconds" />
         <label for="focusSeconds">s</label>
       </div>
       <div class="timeSettingContainer">
         <h4>Short rest:</h4>
-        <input id="focusHours" type="text" />
+        <input id="focusHours" type="text" v-model="formattedShortRest.hours" />
         <label for="focusHours">h</label><span>:</span>
-        <input id="focusMinutes" type="text" />
+        <input
+          id="focusMinutes"
+          type="text"
+          v-model="formattedShortRest.minutes"
+        />
         <label for="focusMinutes">m</label><span>:</span>
-        <input id="focusSeconds" type="text" />
+        <input
+          id="focusSeconds"
+          type="text"
+          v-model="formattedShortRest.seconds"
+        />
         <label for="focusSeconds">s</label>
       </div>
       <div class="timeSettingContainer">
         <h4>Long rest:</h4>
-        <input id="focusHours" type="text" />
+        <input id="focusHours" type="text" v-model="formattedLongRest.hours" />
         <label for="focusHours">h</label><span>:</span>
-        <input id="focusMinutes" type="text" />
+        <input
+          id="focusMinutes"
+          type="text"
+          v-model="formattedLongRest.minutes"
+        />
         <label for="focusMinutes">m</label><span>:</span>
-        <input id="focusSeconds" type="text" />
+        <input
+          id="focusSeconds"
+          type="text"
+          v-model="formattedLongRest.seconds"
+        />
         <label for="focusSeconds">s</label>
       </div>
       <div class="focusTilLongRestContainer">
@@ -45,9 +61,26 @@ import { BIconXLg } from "bootstrap-icons-vue";
         <input type="text" id="focusTilLongRest" v-model="focusTilLongRest" />
       </div>
     </div>
-    <br /><br /><br />
-    next thing to do is to make the time input more userfreindy also you havent
-    hooked up functions yet
+    <div class="audio">
+      <h3>Audio</h3>
+      <input type="checkbox" id="switch" class="checkbox" />
+      <label for="switch" class="toggle">
+        <p></p>
+      </label>
+    </div>
+
+    <div class="settingsFooter">
+      <div class="signOutBtnContainer">
+        <button class="signOutBtn btn">SIGN OUT</button>
+        <button class="deleteBtn btn">DELETE ACCOUNT</button>
+      </div>
+      <div class="saveContainer">
+        <p class="warning">
+          Warning: Updating timer settings will cause the timer to reset
+        </p>
+        <button class="saveBtn btn">SAVE CHANGES</button>
+      </div>
+    </div>
   </PopupCard>
 </template>
 
@@ -59,15 +92,64 @@ export default {
   },
   data() {
     return {
-      focus: "",
-      shortRest: this.settings.shortRest,
-      longRest: this.settings.longRest,
+      focus: {
+        hours: this.settings.focus.hours,
+        minutes: this.settings.focus.minutes,
+        seconds: this.settings.focus.seconds,
+      },
+
+      shortRest: {
+        hours: this.settings.shortRest.hours,
+        minutes: this.settings.shortRest.minutes,
+        seconds: this.settings.shortRest.seconds,
+      },
+      longRest: {
+        hours: this.settings.longRest.hours,
+        minutes: this.settings.longRest.minutes,
+        seconds: this.settings.longRest.seconds,
+      },
       focusTilLongRest: this.settings.focusTilLongRest,
-      timeInputPlaceHolder: "",
     };
   },
-  methods: {},
-  mounted() {},
+  methods: {
+    convertSecondsToTimeFormat(totalSeconds) {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      return { hours, minutes, seconds };
+    },
+  },
+  computed: {
+    formattedFocus() {
+      return {
+        hours: this.focus.hours.toString().padStart(2, "0"),
+        minutes: this.focus.minutes.toString().padStart(2, "0"),
+        seconds: this.focus.seconds.toString().padStart(2, "0"),
+      };
+    },
+    formattedShortRest() {
+      return {
+        hours: this.shortRest.hours.toString().padStart(2, "0"),
+        minutes: this.shortRest.minutes.toString().padStart(2, "0"),
+        seconds: this.shortRest.seconds.toString().padStart(2, "0"),
+      };
+    },
+    formattedLongRest() {
+      return {
+        hours: this.longRest.hours.toString().padStart(2, "0"),
+        minutes: this.longRest.minutes.toString().padStart(2, "0"),
+        seconds: this.longRest.seconds.toString().padStart(2, "0"),
+      };
+    },
+  },
+  created() {
+    this.focus = this.convertSecondsToTimeFormat(this.settings.focus);
+    this.shortRest = this.convertSecondsToTimeFormat(this.settings.shortRest);
+    this.longRest = this.convertSecondsToTimeFormat(this.settings.longRest);
+  },
+  mounted() {
+    console.log(this.settings);
+  },
 };
 </script>
 <style scoped>
@@ -76,7 +158,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 40px;
+  margin-bottom: 60px;
 }
 .header h1 {
   position: absolute;
@@ -169,6 +251,97 @@ h3 {
   font-family: RobotoMono;
   font-weight: 500;
 
+  text-align: center;
+}
+.audio {
+  margin-top: 60px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 30px;
+  background-color: var(--grey);
+  border-radius: 30px;
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: var(--background);
+  top: 2px;
+  left: 2px;
+  transition: all 0.3s;
+}
+
+.toggle p {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+}
+
+.checkbox:checked + .toggle::after {
+  left: 28px;
+}
+
+.checkbox:checked + .toggle {
+  background-color: var(--primary);
+}
+
+.checkbox {
+  display: none;
+}
+
+.settingsFooter {
+  position: relative;
+  margin-top: auto;
+  display: flex;
+}
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  border-radius: 12px;
+  height: 36px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  border: none;
+}
+.signOutBtnContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.saveContainer {
+  align-self: flex-end;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.signOutBtn {
+  background-color: var(--grey);
+}
+.deleteBtn {
+  background-color: var(--red);
+}
+.saveBtn {
+  background-color: var(--green);
+}
+.warning {
+  color: var(--red);
+  font-weight: 600;
   text-align: center;
 }
 </style>
