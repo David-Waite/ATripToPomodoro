@@ -16,11 +16,14 @@ export default {
       auth: "",
       currentUserDocRef: null,
       userData: null,
-
+      showSettings: false,
       stage: "start",
     };
   },
   methods: {
+    toggleSettings() {
+      this.showSettings = !this.showSettings;
+    },
     // getting current users data
     async fetchUser() {
       this.userData = (
@@ -138,6 +141,8 @@ export default {
     <SettingsPopup
       :username="userData.username"
       :settings="userData.settings"
+      :showSettings
+      @toggleSettings="toggleSettings"
     />
 
     <LoopingBackground :stage="stage" :vehicles="userData.vehiclesOwned" />

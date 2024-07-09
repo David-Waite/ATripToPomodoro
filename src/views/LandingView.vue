@@ -123,7 +123,7 @@ export default {
           timeStudying: 0,
           vehiclesOwned: [
             {
-              name: "Van",
+              name: "Classic",
               price: 0,
               status: "equipped",
             },

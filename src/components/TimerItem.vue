@@ -49,8 +49,8 @@ import { BIconPause, BIconPlay, BIconStop } from "bootstrap-icons-vue";
       <span id="base-timer-label" class="base-timer__label">
         {{ Math.floor(time / 60) }}:{{
           time % 60 < 10 ? "0" + (time % 60) : time % 60
-        }}</span
-      >
+        }}
+      </span>
     </div>
   </div>
 </template>
@@ -64,14 +64,14 @@ export default {
   data() {
     return {
       strokeDashArray: 283,
-      startingTime: this.settings.pomodoroTime * 60,
-      time: this.settings.pomodoroTime * 60,
+      startingTime: this.settings.focus,
+      time: this.settings.focus,
       intervalId: null,
-      shortRest: this.settings.shortRest * 60,
-      longRest: this.settings.longRest * 60,
+      shortRest: this.settings.shortRest,
+      longRest: this.settings.longRest,
       pomodoroTillLongRest: this.settings.pomodoroTillLongRest,
       pomodoroTillLongRestSetting: this.settings.pomodoroTillLongRest,
-      pomodoroTime: this.settings.pomodoroTime * 60,
+      focus: this.settings.focus,
       current: "pomodoro",
       currentStage: this.stage,
     };
@@ -121,8 +121,8 @@ export default {
       this.$emit("updateStage", "start");
 
       this.pomodoroTillLongRest = this.pomodoroTillLongRestSetting;
-      this.time = this.pomodoroTime;
-      this.startingTime = this.pomodoroTime;
+      this.time = this.focus;
+      this.startingTime = this.focus;
       this.current = "pomodoro";
     },
     async hitZero() {
@@ -146,8 +146,8 @@ export default {
         return;
       }
       if (this.current === "shortRest") {
-        this.time = this.pomodoroTime;
-        this.startingTime = this.pomodoroTime;
+        this.time = this.focus;
+        this.startingTime = this.focus;
         this.current = "pomodoro";
         return;
       }
@@ -155,6 +155,9 @@ export default {
         this.stopTimer();
       }
     },
+  },
+  mounted() {
+    console.log(this.settings);
   },
 };
 </script>

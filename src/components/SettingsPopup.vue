@@ -1,13 +1,83 @@
 <script setup>
 import PopupCard from "../components/UI/PopupCard.vue";
-import { BIconXLg } from "bootstrap-icons-vue";
+import { BIconXCircle } from "bootstrap-icons-vue";
+</script>
+<script>
+export default {
+  props: {
+    username: String,
+    settings: Object,
+    showSettings: Boolean,
+  },
+  data() {
+    return {
+      focus: {
+        hours: this.settings.focus.hours,
+        minutes: this.settings.focus.minutes,
+        seconds: this.settings.focus.seconds,
+      },
+
+      shortRest: {
+        hours: this.settings.shortRest.hours,
+        minutes: this.settings.shortRest.minutes,
+        seconds: this.settings.shortRest.seconds,
+      },
+      longRest: {
+        hours: this.settings.longRest.hours,
+        minutes: this.settings.longRest.minutes,
+        seconds: this.settings.longRest.seconds,
+      },
+      focusTilLongRest: this.settings.focusTilLongRest,
+    };
+  },
+  methods: {
+    toggleSettings() {
+      this.$emit("toggleSettings");
+    },
+    convertSecondsToTimeFormat(totalSeconds) {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      return { hours, minutes, seconds };
+    },
+  },
+  computed: {
+    formattedFocus() {
+      return {
+        hours: this.focus.hours.toString().padStart(2, "0"),
+        minutes: this.focus.minutes.toString().padStart(2, "0"),
+        seconds: this.focus.seconds.toString().padStart(2, "0"),
+      };
+    },
+    formattedShortRest() {
+      return {
+        hours: this.shortRest.hours.toString().padStart(2, "0"),
+        minutes: this.shortRest.minutes.toString().padStart(2, "0"),
+        seconds: this.shortRest.seconds.toString().padStart(2, "0"),
+      };
+    },
+    formattedLongRest() {
+      return {
+        hours: this.longRest.hours.toString().padStart(2, "0"),
+        minutes: this.longRest.minutes.toString().padStart(2, "0"),
+        seconds: this.longRest.seconds.toString().padStart(2, "0"),
+      };
+    },
+  },
+  created() {
+    this.focus = this.convertSecondsToTimeFormat(this.settings.focus);
+    this.shortRest = this.convertSecondsToTimeFormat(this.settings.shortRest);
+    this.longRest = this.convertSecondsToTimeFormat(this.settings.longRest);
+  },
+  mounted() {},
+};
 </script>
 <template>
-  <PopupCard>
+  <PopupCard v-if="showSettings">
     <div class="header">
       <h2>Username: {{ username }}</h2>
       <h1>SETTINGS</h1>
-      <BIconXLg />
+      <BIconXCircle @click="toggleSettings" />
     </div>
 
     <div class="timerSettings">
@@ -84,74 +154,6 @@ import { BIconXLg } from "bootstrap-icons-vue";
   </PopupCard>
 </template>
 
-<script>
-export default {
-  props: {
-    username: String,
-    settings: Object,
-  },
-  data() {
-    return {
-      focus: {
-        hours: this.settings.focus.hours,
-        minutes: this.settings.focus.minutes,
-        seconds: this.settings.focus.seconds,
-      },
-
-      shortRest: {
-        hours: this.settings.shortRest.hours,
-        minutes: this.settings.shortRest.minutes,
-        seconds: this.settings.shortRest.seconds,
-      },
-      longRest: {
-        hours: this.settings.longRest.hours,
-        minutes: this.settings.longRest.minutes,
-        seconds: this.settings.longRest.seconds,
-      },
-      focusTilLongRest: this.settings.focusTilLongRest,
-    };
-  },
-  methods: {
-    convertSecondsToTimeFormat(totalSeconds) {
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-      return { hours, minutes, seconds };
-    },
-  },
-  computed: {
-    formattedFocus() {
-      return {
-        hours: this.focus.hours.toString().padStart(2, "0"),
-        minutes: this.focus.minutes.toString().padStart(2, "0"),
-        seconds: this.focus.seconds.toString().padStart(2, "0"),
-      };
-    },
-    formattedShortRest() {
-      return {
-        hours: this.shortRest.hours.toString().padStart(2, "0"),
-        minutes: this.shortRest.minutes.toString().padStart(2, "0"),
-        seconds: this.shortRest.seconds.toString().padStart(2, "0"),
-      };
-    },
-    formattedLongRest() {
-      return {
-        hours: this.longRest.hours.toString().padStart(2, "0"),
-        minutes: this.longRest.minutes.toString().padStart(2, "0"),
-        seconds: this.longRest.seconds.toString().padStart(2, "0"),
-      };
-    },
-  },
-  created() {
-    this.focus = this.convertSecondsToTimeFormat(this.settings.focus);
-    this.shortRest = this.convertSecondsToTimeFormat(this.settings.shortRest);
-    this.longRest = this.convertSecondsToTimeFormat(this.settings.longRest);
-  },
-  mounted() {
-    console.log(this.settings);
-  },
-};
-</script>
 <style scoped>
 .header {
   position: relative;
