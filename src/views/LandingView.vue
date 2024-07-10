@@ -53,7 +53,7 @@ import { doc, setDoc } from "firebase/firestore";
   <div class="container">
     <img
       class="background"
-      src="../assets/imageBackface.png"
+      src="../assets/images/backgrounds/sunsetDrive/backface.png"
       alt="background image "
     />
     <h1>A Trip to <br /><span>Pomodoro</span></h1>
