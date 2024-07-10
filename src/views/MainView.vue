@@ -5,8 +5,9 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import db from "@/main";
 
 import TimerItem from "../components/TimerItem.vue";
-
+import NavItem from "../components/NavItem.vue";
 import SettingsPopup from "@/components/SettingsPopup.vue";
+import ShopPopup from "@/components/ShopPopup.vue";
 </script>
 
 <script>
@@ -17,12 +18,20 @@ export default {
       currentUserDocRef: null,
       userData: null,
       showSettings: false,
+      showShop: false,
       stage: "start",
     };
   },
   methods: {
     toggleSettings() {
       this.showSettings = !this.showSettings;
+    },
+    toggleShop() {
+      this.showShop = !this.showShop;
+    },
+    refresh() {
+      this.userData = null;
+      this.fetchUser();
     },
     // getting current users data
     async fetchUser() {
@@ -73,7 +82,7 @@ export default {
     async updateTimeStudying() {
       const timeStudying =
         Number(this.userData.timeStudying) +
-        Number(this.userData.settings.pomodoroTime * 60);
+        Number(this.userData.settings.focus);
 
       await updateDoc(this.currentUserDocRef, { timeStudying: timeStudying });
       this.fetchUser();
@@ -117,6 +126,7 @@ export default {
   computed() {},
   watch: {
     userData: function (userData) {
+      console.log("whats the point in this");
       this.userData = userData;
     },
   },
@@ -124,7 +134,7 @@ export default {
     this.auth = getAuth();
     onAuthStateChanged(this.auth, (user) => {
       if (!user) {
-        this.$router.push("/login");
+        this.$router.push("/landing");
         return;
       }
 
@@ -138,11 +148,25 @@ export default {
 
 <template>
   <div class="container" v-if="userData">
+    <NavItem
+      @toggleSettings="toggleSettings"
+      :username="userData.username"
+      @toggleShop="toggleShop"
+    />
     <SettingsPopup
       :username="userData.username"
       :settings="userData.settings"
       :showSettings
+      :auth="auth"
       @toggleSettings="toggleSettings"
+      @refresh="refresh"
+    />
+    <ShopPopup
+      :showShop
+      @toggleShop="toggleShop"
+      :userData="userData"
+      @equipVehicle="equipVehicle"
+      @buyVehicle="buyVehicle"
     />
 
     <LoopingBackground :stage="stage" :vehicles="userData.vehiclesOwned" />

@@ -56,7 +56,7 @@
 @font-face {
   font-family: "RobotoMono";
   src: url("@/assets/fonts/RobotoMono-SemiBold.ttf");
-  font-weight: 500;
+  font-weight: 600;
 }
 
 @font-face {
@@ -83,4 +83,14 @@ body {
   font-family: RobotoMono;
   font-weight: 400;
   overflow: hidden;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
 }

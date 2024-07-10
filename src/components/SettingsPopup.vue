@@ -1,79 +1,135 @@
 <script setup>
+import { deleteUser, signOut } from "firebase/auth";
 import PopupCard from "../components/UI/PopupCard.vue";
 import { BIconXCircle } from "bootstrap-icons-vue";
+import { deleteDoc, doc, getFirestore, updateDoc } from "firebase/firestore";
+import db from "@/main";
 </script>
 <script>
 export default {
   props: {
+    auth: Object,
     username: String,
     settings: Object,
     showSettings: Boolean,
   },
   data() {
     return {
-      focus: {
-        hours: this.settings.focus.hours,
-        minutes: this.settings.focus.minutes,
-        seconds: this.settings.focus.seconds,
-      },
+      settingChange: false,
+      deletePopUp: false,
+      time: {
+        focus: {
+          hours: Math.floor(this.settings.focus / 3600),
+          minutes: Math.floor((this.settings.focus % 3600) / 60),
+          seconds: Math.floor(this.settings.focus % 60),
+        },
 
-      shortRest: {
-        hours: this.settings.shortRest.hours,
-        minutes: this.settings.shortRest.minutes,
-        seconds: this.settings.shortRest.seconds,
+        shortRest: {
+          hours: Math.floor(this.settings.shortRest / 3600),
+          minutes: Math.floor((this.settings.shortRest % 3600) / 60),
+          seconds: Math.floor(this.settings.shortRest % 60),
+        },
+        longRest: {
+          hours: Math.floor(this.settings.longRest / 3600),
+          minutes: Math.floor((this.settings.longRest % 3600) / 60),
+          seconds: Math.floor(this.settings.longRest % 60),
+        },
+        focusTilLongRest: this.settings.focusTilLongRest,
       },
-      longRest: {
-        hours: this.settings.longRest.hours,
-        minutes: this.settings.longRest.minutes,
-        seconds: this.settings.longRest.seconds,
-      },
-      focusTilLongRest: this.settings.focusTilLongRest,
     };
   },
   methods: {
     toggleSettings() {
       this.$emit("toggleSettings");
     },
-    convertSecondsToTimeFormat(totalSeconds) {
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-      return { hours, minutes, seconds };
+    toggleDeletePopup() {
+      this.deletePopUp = !this.deletePopUp;
+    },
+
+    handleSignOut() {
+      signOut(this.auth);
+    },
+
+    async handleDelete() {
+      const db = getFirestore();
+      const user = this.auth.currentUser;
+      const uid = user.uid;
+
+      // Get a reference to the user's document in Firestore
+      const userDoc = doc(db, "users", uid);
+
+      try {
+        // Delete the user's document from Firestore
+        await deleteDoc(userDoc);
+        console.log("User document deleted successfully");
+
+        // Then delete the user's account
+        await deleteUser(user);
+        console.log("User account deleted successfully");
+      } catch (error) {
+        console.error("Error while deleting user account or document", error);
+      }
+    },
+    convertTimeFormatToSeconds(time) {
+      return time.hours * 3600 + time.minutes * 60 + time.seconds;
+    },
+    async handleSaveChanges() {
+      if (!this.settingChange) {
+        return;
+      }
+      const usersDoc = doc(db, "users", this.auth.currentUser.uid);
+      await updateDoc(usersDoc, {
+        settings: {
+          focus: this.convertTimeFormatToSeconds(this.time.focus),
+          focusTilLongRest: this.time.focusTilLongRest,
+          longRest: this.convertTimeFormatToSeconds(this.time.longRest),
+          shortRest: this.convertTimeFormatToSeconds(this.time.shortRest),
+        },
+      });
+      this.$emit("refresh");
     },
   },
-  computed: {
-    formattedFocus() {
-      return {
-        hours: this.focus.hours.toString().padStart(2, "0"),
-        minutes: this.focus.minutes.toString().padStart(2, "0"),
-        seconds: this.focus.seconds.toString().padStart(2, "0"),
-      };
-    },
-    formattedShortRest() {
-      return {
-        hours: this.shortRest.hours.toString().padStart(2, "0"),
-        minutes: this.shortRest.minutes.toString().padStart(2, "0"),
-        seconds: this.shortRest.seconds.toString().padStart(2, "0"),
-      };
-    },
-    formattedLongRest() {
-      return {
-        hours: this.longRest.hours.toString().padStart(2, "0"),
-        minutes: this.longRest.minutes.toString().padStart(2, "0"),
-        seconds: this.longRest.seconds.toString().padStart(2, "0"),
-      };
+  computed: {},
+  watch: {
+    time: {
+      deep: true,
+      handler(newTime) {
+        let newFocus = this.convertTimeFormatToSeconds(newTime.focus);
+        let newShortRest = this.convertTimeFormatToSeconds(newTime.shortRest);
+        let newLongRest = this.convertTimeFormatToSeconds(newTime.longRest);
+        if (
+          newFocus != this.settings.focus ||
+          newShortRest != this.settings.shortRest ||
+          newLongRest != this.settings.longRest ||
+          newTime.focusTilLongRest != this.settings.focusTilLongRest
+        ) {
+          this.settingChange = true;
+        } else {
+          this.settingChange = false;
+        }
+      },
     },
   },
-  created() {
-    this.focus = this.convertSecondsToTimeFormat(this.settings.focus);
-    this.shortRest = this.convertSecondsToTimeFormat(this.settings.shortRest);
-    this.longRest = this.convertSecondsToTimeFormat(this.settings.longRest);
-  },
+  created() {},
   mounted() {},
 };
 </script>
 <template>
   <PopupCard v-if="showSettings">
+    <div class="deleteDimmer" v-if="deletePopUp"></div>
+    <div class="deletePopup" v-if="deletePopUp">
+      <h2 class="deleteText">
+        Are you sure you want to permanently delete your account?
+      </h2>
+      <div>
+        <button class="deleteBtn btn" @click="handleDelete">
+          DELETE ACCOUNT
+        </button>
+        <button class="signOutBtn btn" @click="toggleDeletePopup">
+          CANCEL
+        </button>
+      </div>
+    </div>
     <div class="header">
       <h2>Username: {{ username }}</h2>
       <h1>SETTINGS</h1>
@@ -85,50 +141,54 @@ export default {
 
       <div class="timeSettingContainer">
         <h4>Focus:</h4>
-        <input id="focusHours" type="text" v-model="formattedFocus.hours" />
+        <input id="focusHours" type="number" v-model="time.focus.hours" />
         <label for="focusHours">h</label><span>:</span>
-        <input id="focusMinutes" type="text" v-model="formattedFocus.minutes" />
+        <input id="focusMinutes" type="number" v-model="time.focus.minutes" />
         <label for="focusMinutes">m</label><span>:</span>
-        <input id="focusSeconds" type="text" v-model="formattedFocus.seconds" />
+        <input id="focusSeconds" type="number" v-model="time.focus.seconds" />
         <label for="focusSeconds">s</label>
       </div>
       <div class="timeSettingContainer">
         <h4>Short rest:</h4>
-        <input id="focusHours" type="text" v-model="formattedShortRest.hours" />
+        <input id="focusHours" type="number" v-model="time.shortRest.hours" />
         <label for="focusHours">h</label><span>:</span>
         <input
           id="focusMinutes"
-          type="text"
-          v-model="formattedShortRest.minutes"
+          type="number"
+          v-model="time.shortRest.minutes"
         />
         <label for="focusMinutes">m</label><span>:</span>
         <input
           id="focusSeconds"
-          type="text"
-          v-model="formattedShortRest.seconds"
+          type="number"
+          v-model="time.shortRest.seconds"
         />
         <label for="focusSeconds">s</label>
       </div>
       <div class="timeSettingContainer">
         <h4>Long rest:</h4>
-        <input id="focusHours" type="text" v-model="formattedLongRest.hours" />
+        <input id="focusHours" type="number" v-model="time.longRest.hours" />
         <label for="focusHours">h</label><span>:</span>
         <input
           id="focusMinutes"
-          type="text"
-          v-model="formattedLongRest.minutes"
+          type="number"
+          v-model="time.longRest.minutes"
         />
         <label for="focusMinutes">m</label><span>:</span>
         <input
           id="focusSeconds"
-          type="text"
-          v-model="formattedLongRest.seconds"
+          type="number"
+          v-model="time.longRest.seconds"
         />
         <label for="focusSeconds">s</label>
       </div>
       <div class="focusTilLongRestContainer">
-        <label for="focusTilLongRest">focus period's until long rest:</label>
-        <input type="text" id="focusTilLongRest" v-model="focusTilLongRest" />
+        <label for="focusTilLongRest">Focus period's until long rest:</label>
+        <input
+          type="text"
+          id="focusTilLongRest"
+          v-model="time.focusTilLongRest"
+        />
       </div>
     </div>
     <div class="audio">
@@ -141,14 +201,22 @@ export default {
 
     <div class="settingsFooter">
       <div class="signOutBtnContainer">
-        <button class="signOutBtn btn">SIGN OUT</button>
-        <button class="deleteBtn btn">DELETE ACCOUNT</button>
+        <button class="signOutBtn btn" @click="handleSignOut">SIGN OUT</button>
+        <button class="deleteBtn btn" @click="toggleDeletePopup">
+          DELETE ACCOUNT
+        </button>
       </div>
       <div class="saveContainer">
-        <p class="warning">
+        <p class="warning" v-if="settingChange">
           Warning: Updating timer settings will cause the timer to reset
         </p>
-        <button class="saveBtn btn">SAVE CHANGES</button>
+        <button
+          :class="settingChange ? 'saveBtn' : 'signOutBtn disabled'"
+          class="btn"
+          @click="handleSaveChanges"
+        >
+          SAVE CHANGES
+        </button>
       </div>
     </div>
   </PopupCard>
@@ -167,6 +235,9 @@ export default {
 
   left: 50%;
   transform: translateX(-50%);
+}
+.header svg {
+  cursor: pointer;
 }
 
 .header h1,
@@ -268,6 +339,7 @@ h3 {
   height: 30px;
   background-color: var(--grey);
   border-radius: 30px;
+  cursor: pointer;
 }
 
 .toggle::after {
@@ -305,6 +377,7 @@ h3 {
   display: flex;
 }
 .btn {
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -315,6 +388,7 @@ h3 {
   font-weight: 600;
   color: var(--white);
   border: none;
+  transition: 0.3s;
 }
 .signOutBtnContainer {
   display: flex;
@@ -341,14 +415,55 @@ h3 {
 .saveBtn {
   background-color: var(--green);
 }
+.disabled {
+  cursor: default;
+}
+.deleteBtn:hover {
+  background-color: #e64343;
+}
+.signOutBtn:hover {
+  background-color: #929292;
+}
+.saveBtn:hover {
+  background-color: #63b38c;
+}
 .warning {
   color: var(--red);
   font-weight: 600;
   text-align: center;
 }
+.deletePopup {
+  position: absolute;
+  z-index: 7;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--background);
+  border: 4px solid var(--backgroundBorder);
+  border-radius: 40px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.deletePopup div {
+  display: flex;
+  gap: 16px;
+}
+.deleteDimmer {
+  position: absolute;
+  z-index: 6;
+  background-color: rgba(0, 0, 0, 0.518);
+  border: 4px solid var(--backgroundBorder);
+  width: 98vw;
+  height: 95vh;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 40px;
+}
+.deleteText {
+  color: var(--black);
+}
 </style>
-<!-- this.$nextTick(() => {
-  let caretPosition = 2; // Change this to the desired caret position
-  this.$refs.focusInput.focus();
-  this.$refs.focusInput.setSelectionRange(caretPosition, caretPosition);
-}); -->

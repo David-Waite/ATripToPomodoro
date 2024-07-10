@@ -47,8 +47,20 @@ import { BIconPause, BIconPlay, BIconStop } from "bootstrap-icons-vue";
       </svg>
 
       <span id="base-timer-label" class="base-timer__label">
-        {{ Math.floor(time / 60) }}:{{
-          time % 60 < 10 ? "0" + (time % 60) : time % 60
+        {{
+          Math.floor(time / 3600) > 0
+            ? Math.floor(time / 3600)
+                .toString()
+                .padStart(2, "0") +
+              ":" +
+              Math.floor((time % 3600) / 60)
+                .toString()
+                .padStart(2, "0") +
+              ":" +
+              (time % 60).toString().padStart(2, "0")
+            : Math.floor(time / 60) +
+              ":" +
+              (time % 60).toString().padStart(2, "0")
         }}
       </span>
     </div>
@@ -156,9 +168,7 @@ export default {
       }
     },
   },
-  mounted() {
-    console.log(this.settings);
-  },
+  mounted() {},
 };
 </script>
 

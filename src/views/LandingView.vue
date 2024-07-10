@@ -127,7 +127,6 @@ export default {
               price: 0,
               status: "equipped",
             },
-            1,
           ],
         });
 
