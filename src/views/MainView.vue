@@ -8,6 +8,7 @@ import TimerItem from "../components/TimerItem.vue";
 import NavItem from "../components/NavItem.vue";
 import SettingsPopup from "@/components/SettingsPopup.vue";
 import ShopPopup from "@/components/ShopPopup.vue";
+import PomodoroDollarsEarned from "@/components/UI/PomodoroDollarsEarned.vue";
 </script>
 
 <script>
@@ -20,6 +21,7 @@ export default {
       showSettings: false,
       showShop: false,
       stage: "start",
+      showMoneyEarned: false,
     };
   },
   methods: {
@@ -86,6 +88,10 @@ export default {
 
       await updateDoc(this.currentUserDocRef, { timeStudying: timeStudying });
       this.fetchUser();
+      this.showMoneyEarned = true;
+      setTimeout(() => {
+        this.showMoneyEarned = false;
+      }, 2000);
     },
 
     //Buy vehicle (updating firestore)
@@ -148,6 +154,10 @@ export default {
 
 <template>
   <div class="container" v-if="userData">
+    <PomodoroDollarsEarned
+      :visable="showMoneyEarned"
+      :earnedAmount="userData.settings.focus"
+    />
     <NavItem
       @toggleSettings="toggleSettings"
       :username="userData.username"

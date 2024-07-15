@@ -3,7 +3,19 @@ import { BIconPause, BIconPlay, BIconStop } from "bootstrap-icons-vue";
 </script>
 <template>
   <div>
-    <div class="base-timer">
+    <div
+      class="base-timer"
+      :class="stage === 'running' ? 'running' : 'notRunning'"
+    >
+      <p class="currentTimerText">
+        {{
+          current === "pomodoro"
+            ? "Focus"
+            : current === "shortRest"
+            ? "Short Rest"
+            : "Long Rest"
+        }}
+      </p>
       <div class="buttonContiainer">
         <button v-if="stage == 'start'" @click="startTimer">
           <BIconPlay />
@@ -81,8 +93,8 @@ export default {
       intervalId: null,
       shortRest: this.settings.shortRest,
       longRest: this.settings.longRest,
-      pomodoroTillLongRest: this.settings.pomodoroTillLongRest,
-      pomodoroTillLongRestSetting: this.settings.pomodoroTillLongRest,
+      pomodoroTillLongRest: this.settings.focusTilLongRest,
+      pomodoroTillLongRestSetting: this.settings.focusTilLongRest,
       focus: this.settings.focus,
       current: "pomodoro",
       currentStage: this.stage,
@@ -175,33 +187,69 @@ export default {
 <style scoped>
 .pauseStopContainer {
   display: flex;
-  gap: 12px;
+  gap: 8px;
 }
+.running .buttonContiainer svg {
+  color: transparent;
+}
+
+.running:hover .buttonContiainer svg {
+  color: rgb(237, 237, 237);
+}
+
+.running button {
+  border-color: transparent;
+}
+.running:hover button {
+  border-color: rgb(237, 237, 237);
+}
+.notRunning .buttonContiainer svg {
+  color: rgb(237, 237, 237);
+}
+.notRunning button {
+  border-color: rgb(237, 237, 237);
+}
+
 .buttonContiainer {
+  display: block;
   position: absolute;
   z-index: 2;
-  bottom: 20%;
+  transition: 0.3s;
+  bottom: 13%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
+.currentTimerText {
+  position: absolute;
+  bottom: 27%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--white);
+  font-size: 20px;
+  font-weight: 500;
+}
 button {
   background-color: transparent;
-  border: 2px solid rgb(237, 237, 237);
+  border: 2px solid;
   border-radius: 50%;
   padding: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: 0.3s;
 }
 .buttonContiainer svg {
-  font-size: 24px;
+  font-size: 20px;
+  transition: 0.3s;
   font-weight: 900;
-  color: rgb(237, 237, 237);
+
+  cursor: pointer;
 }
 .base-timer {
   position: relative;
-  width: 300px;
-  height: 300px;
+  width: 330px;
+  height: 330px;
 }
 
 .base-timer__svg {
@@ -215,29 +263,31 @@ button {
 
 .base-timer__path-elapsed {
   stroke-width: 1px;
-  stroke: rgb(237, 237, 237);
+  stroke: #dfdfdf93;
 }
 
 .base-timer__path-remaining {
   stroke-width: 1px;
-  stroke: aqua;
+
   stroke-linecap: round;
   transform: rotate(90deg);
   transform-origin: center;
   transition: 1s linear all;
   fill-rule: nonzero;
-  stroke: aqua;
+  stroke: var(--white);
+  filter: drop-shadow(0 0 1px white);
 }
 
 .base-timer__label {
   position: absolute;
-  width: 300px;
-  height: 300px;
+  width: 330px;
+  height: 330px;
   top: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48px;
+  font-size: 64px;
+  font-weight: 300;
   color: white;
 }
 </style>
