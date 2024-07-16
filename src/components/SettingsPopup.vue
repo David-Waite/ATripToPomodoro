@@ -2,8 +2,7 @@
 import { deleteUser, signOut } from "firebase/auth";
 import PopupCard from "../components/UI/PopupCard.vue";
 import { BIconXCircle } from "bootstrap-icons-vue";
-import { deleteDoc, doc, getFirestore, updateDoc } from "firebase/firestore";
-import db from "@/main";
+import { deleteDoc, doc, getFirestore } from "firebase/firestore";
 </script>
 <script>
 export default {
@@ -12,6 +11,7 @@ export default {
     username: String,
     settings: Object,
     showSettings: Boolean,
+    loggedIn: Boolean,
   },
   data() {
     return {
@@ -48,6 +48,7 @@ export default {
 
     handleSignOut() {
       signOut(this.auth);
+      this.$emit("refresh");
     },
 
     async handleDelete() {
@@ -77,16 +78,14 @@ export default {
       if (!this.settingChange) {
         return;
       }
-      const usersDoc = doc(db, "users", this.auth.currentUser.uid);
-      await updateDoc(usersDoc, {
-        settings: {
-          focus: this.convertTimeFormatToSeconds(this.time.focus),
-          focusTilLongRest: this.time.focusTilLongRest,
-          longRest: this.convertTimeFormatToSeconds(this.time.longRest),
-          shortRest: this.convertTimeFormatToSeconds(this.time.shortRest),
-        },
-      });
-      this.$emit("refresh");
+
+      const updatedSettings = {
+        focus: this.convertTimeFormatToSeconds(this.time.focus),
+        focusTilLongRest: this.time.focusTilLongRest,
+        longRest: this.convertTimeFormatToSeconds(this.time.longRest),
+        shortRest: this.convertTimeFormatToSeconds(this.time.shortRest),
+      };
+      this.$emit("updateSettings", updatedSettings);
     },
   },
   computed: {},
@@ -131,7 +130,7 @@ export default {
       </div>
     </div>
     <div class="header">
-      <h2>Username: {{ username }}</h2>
+      <h2>Username: {{ loggedIn ? username : "Guest" }}</h2>
       <h1>SETTINGS</h1>
       <BIconXCircle @click="toggleSettings" />
     </div>
@@ -200,7 +199,7 @@ export default {
     </div>
 
     <div class="settingsFooter">
-      <div class="signOutBtnContainer">
+      <div class="signOutBtnContainer" v-if="loggedIn">
         <button class="signOutBtn btn" @click="handleSignOut">SIGN OUT</button>
         <button class="deleteBtn btn" @click="toggleDeletePopup">
           DELETE ACCOUNT

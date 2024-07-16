@@ -1,11 +1,16 @@
 <script setup>
-import { BIconShop, BIconGearFill } from "bootstrap-icons-vue";
+import {
+  BIconShop,
+  BIconGearFill,
+  BIconPersonCircle,
+} from "bootstrap-icons-vue";
 </script>
 
 <script>
 export default {
   props: {
     username: String,
+    loggedIn: Boolean,
   },
   data() {
     return {};
@@ -17,6 +22,9 @@ export default {
     toggleShop() {
       this.$emit("toggleShop");
     },
+    toggleAccount() {
+      this.$emit("toggleAccount");
+    },
   },
   mounted() {},
 };
@@ -25,16 +33,23 @@ export default {
 <template>
   <div class="navOuterContainer">
     <div class="navContainer">
-      <div>
-        <h2>Welcome {{ username }}</h2>
+      <div
+        :class="!loggedIn ? 'iconContainerLoggedIn' : 'iconContainerLoggedOut'"
+      >
+        <h2 v-if="loggedIn">Welcome {{ username }}</h2>
+        <button v-if="!loggedIn">
+          <BIconPersonCircle @click="toggleAccount" />
+        </button>
         <button>
           <BIconShop @click="toggleShop" />
         </button>
       </div>
 
-      <button>
-        <BIconGearFill @click="toggleSettings" />
-      </button>
+      <div>
+        <button>
+          <BIconGearFill @click="toggleSettings" />
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -58,12 +73,17 @@ export default {
   display: flex;
   justify-content: space-between;
 }
+
 .navContainer div {
   display: flex;
   align-items: center;
+}
+.iconContainerLoggedOut {
   gap: 24px;
 }
-
+.iconContainerLoggedIn {
+  gap: 12px;
+}
 .navContainer button {
   background-color: transparent;
   border: none;

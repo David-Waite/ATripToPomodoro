@@ -9,22 +9,45 @@ import NavItem from "../components/NavItem.vue";
 import SettingsPopup from "@/components/SettingsPopup.vue";
 import ShopPopup from "@/components/ShopPopup.vue";
 import PomodoroDollarsEarned from "@/components/UI/PomodoroDollarsEarned.vue";
+import AccountPopup from "@/components/AccountPopup.vue";
 </script>
 
 <script>
 export default {
   data() {
     return {
-      auth: "",
+      auth: {},
+      loggedIn: false,
       currentUserDocRef: null,
-      userData: null,
+      userData: {
+        timeStudying: 5000,
+        username: null,
+        vehiclesOwned: [
+          {
+            price: 0,
+            status: "equipped",
+            name: "Classic",
+          },
+        ],
+        settings: {
+          longRest: 1800,
+          focusTilLongRest: 4,
+          focus: 1500,
+          shortRest: 300,
+        },
+        email: null,
+      },
       showSettings: false,
       showShop: false,
       stage: "start",
       showMoneyEarned: false,
+      showAccountPopUp: false,
     };
   },
   methods: {
+    toggleAccount() {
+      this.showAccountPopUp = !this.showAccountPopUp;
+    },
     toggleSettings() {
       this.showSettings = !this.showSettings;
     },
@@ -32,16 +55,41 @@ export default {
       this.showShop = !this.showShop;
     },
     refresh() {
+      this.stage = "start";
+      this.showSettings = false;
+      this.showShop = false;
+      this.showAccountPopUp = false;
+      if (!this.loggedIn) {
+        console.log("hello");
+        let newUserData = this.userData;
+        this.userData = null;
+
+        setTimeout(() => {
+          this.userData = newUserData;
+        }, 1);
+        return;
+      }
       this.userData = null;
       this.fetchUser();
     },
     // getting current users data
     async fetchUser() {
+      if (!this.loggedIn) {
+        this.userData.vehiclesOwned = await this.checkForVehiclesToAdd();
+
+        return;
+      }
       this.userData = (
         await getDoc(doc(db, "users", this.auth.currentUser.uid))
       ).data();
 
-      this.checkForVehiclesToAdd();
+      let vehiclesToBeAdded = await this.checkForVehiclesToAdd();
+
+      if (vehiclesToBeAdded.length > 0) {
+        await updateDoc(this.currentUserDocRef, {
+          vehiclesOwned: vehiclesToBeAdded,
+        });
+      }
     },
 
     //Updates userfirestore with new vehicles
@@ -68,11 +116,9 @@ export default {
             });
           }
         }
-
-        await updateDoc(this.currentUserDocRef, {
-          vehiclesOwned: vechiclesToBeAdded,
-        });
+        return vechiclesToBeAdded;
       }
+      return [];
     },
 
     //SETTER for stage
@@ -86,8 +132,13 @@ export default {
         Number(this.userData.timeStudying) +
         Number(this.userData.settings.focus);
 
-      await updateDoc(this.currentUserDocRef, { timeStudying: timeStudying });
-      this.fetchUser();
+      if (this.loggedIn) {
+        await updateDoc(this.currentUserDocRef, { timeStudying: timeStudying });
+        this.fetchUser();
+      } else {
+        this.userData.timeStudying = timeStudying;
+      }
+
       this.showMoneyEarned = true;
       setTimeout(() => {
         this.showMoneyEarned = false;
@@ -102,10 +153,16 @@ export default {
         );
         if (vehicleIndex !== -1) {
           this.userData.vehiclesOwned[vehicleIndex].status = "equip";
-          await updateDoc(this.currentUserDocRef, {
-            vehiclesOwned: this.userData.vehiclesOwned,
-            timeStudying: this.userData.timeStudying - vehicle.price,
-          });
+          this.userData.timeStudying =
+            this.userData.timeStudying - vehicle.price;
+          if (!this.loggedIn) {
+            return;
+          } else {
+            await updateDoc(this.currentUserDocRef, {
+              vehiclesOwned: this.userData.vehiclesOwned,
+              timeStudying: this.userData.timeStudying,
+            });
+          }
         }
 
         this.fetchUser(this.auth.currentUser);
@@ -123,16 +180,32 @@ export default {
 
       this.userData.vehiclesOwned[vehicleToUnequip].status = "equip";
       this.userData.vehiclesOwned[vehicleToEquip].status = "equipped";
+
+      if (!this.loggedIn) {
+        return;
+      }
       await updateDoc(this.currentUserDocRef, {
         vehiclesOwned: this.userData.vehiclesOwned,
       });
+    },
+    async updateSettings(settings) {
+      console.log(settings);
+
+      if (!this.loggedIn) {
+        this.userData.settings = settings;
+      } else {
+        await updateDoc(this.currentUserDocRef, {
+          settings: settings,
+        });
+      }
+
+      this.refresh();
     },
   },
 
   computed() {},
   watch: {
     userData: function (userData) {
-      console.log("whats the point in this");
       this.userData = userData;
     },
   },
@@ -140,13 +213,13 @@ export default {
     this.auth = getAuth();
     onAuthStateChanged(this.auth, (user) => {
       if (!user) {
-        this.$router.push("/landing");
-        return;
+        this.loggedIn = false;
+        this.fetchUser();
+      } else {
+        this.currentUserDocRef = doc(db, "users", this.auth.currentUser.uid);
+        this.loggedIn = true;
+        this.refresh();
       }
-
-      this.currentUserDocRef = doc(db, "users", this.auth.currentUser.uid);
-
-      this.fetchUser();
     });
   },
 };
@@ -158,17 +231,26 @@ export default {
       :visable="showMoneyEarned"
       :earnedAmount="userData.settings.focus"
     />
+    <AccountPopup
+      :show="showAccountPopUp"
+      @toggleAccount="toggleAccount"
+      @refresh="refresh"
+    />
     <NavItem
+      :loggedIn="loggedIn"
       @toggleSettings="toggleSettings"
       :username="userData.username"
       @toggleShop="toggleShop"
+      @toggleAccount="toggleAccount"
     />
     <SettingsPopup
       :username="userData.username"
       :settings="userData.settings"
+      :loggedIn="loggedIn"
       :showSettings
       :auth="auth"
       @toggleSettings="toggleSettings"
+      @updateSettings="updateSettings"
       @refresh="refresh"
     />
     <ShopPopup

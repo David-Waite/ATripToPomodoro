@@ -22,9 +22,7 @@ export default {
   computed: {},
   watch: {},
   created() {},
-  mounted() {
-    console.log(this.userData.vehiclesOwned);
-  },
+  mounted() {},
 };
 </script>
 <template>
