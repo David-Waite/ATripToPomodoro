@@ -1,5 +1,10 @@
 <script setup>
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import LoopingBackground from "@/components/LoopingBackground.vue";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import db from "@/main";
@@ -10,16 +15,15 @@ import SettingsPopup from "@/components/SettingsPopup.vue";
 import ShopPopup from "@/components/ShopPopup.vue";
 import PomodoroDollarsEarned from "@/components/UI/PomodoroDollarsEarned.vue";
 import AccountPopup from "@/components/AccountPopup.vue";
+import { nextTick } from "vue";
 </script>
 
 <script>
 export default {
   data() {
     return {
-      auth: {},
-      loggedIn: false,
-      currentUserDocRef: null,
-      userData: {
+      contentLoaded: false,
+      guestUser: {
         timeStudying: 5000,
         username: null,
         vehiclesOwned: [
@@ -37,6 +41,10 @@ export default {
         },
         email: null,
       },
+      auth: {},
+      loggedIn: false,
+      currentUserDocRef: null,
+      userData: null,
       showSettings: false,
       showShop: false,
       stage: "start",
@@ -54,34 +62,46 @@ export default {
     toggleShop() {
       this.showShop = !this.showShop;
     },
+    async login(email, password) {
+      this.contentLoaded = false;
+      try {
+        await signInWithEmailAndPassword(getAuth(), email, password);
+      } catch (error) {
+        console.log(error.code);
+
+        console.error("Error creating user:", error);
+      }
+    },
+    async logout() {
+      this.contentLoaded = false;
+      await signOut(this.auth);
+    },
     refresh() {
       this.stage = "start";
       this.showSettings = false;
       this.showShop = false;
       this.showAccountPopUp = false;
-      if (!this.loggedIn) {
-        console.log("hello");
-        let newUserData = this.userData;
-        this.userData = null;
+      // if (!this.loggedIn) {
+      //   console.log("hello");
+      //   let newUserData = this.userData;
+      //   this.userData = null;
 
-        setTimeout(() => {
-          this.userData = newUserData;
-        }, 1);
-        return;
-      }
-      this.userData = null;
-      this.fetchUser();
+      //   setTimeout(() => {
+      //     this.userData = newUserData;
+      //   }, 1);
+      //   return;
+      // }
+      // this.userData = null;
+      // this.fetchUser();
     },
     // getting current users data
     async fetchUser() {
       if (!this.loggedIn) {
+        console.log("got here");
         this.userData.vehiclesOwned = await this.checkForVehiclesToAdd();
-
+        this.contentLoaded = true;
         return;
       }
-      this.userData = (
-        await getDoc(doc(db, "users", this.auth.currentUser.uid))
-      ).data();
 
       let vehiclesToBeAdded = await this.checkForVehiclesToAdd();
 
@@ -90,6 +110,7 @@ export default {
           vehiclesOwned: vehiclesToBeAdded,
         });
       }
+      this.contentLoaded = true;
     },
 
     //Updates userfirestore with new vehicles
@@ -100,9 +121,9 @@ export default {
       );
       let vehiclesData = vehiclesSnapshot.data();
       vehiclesData = vehiclesData["all"];
+      let vechiclesToBeAdded = this.userData.vehiclesOwned;
       //checks to see if any new vehicles have been added to the firebase, and updates the users firestore
       if (this.userData.vehiclesOwned.length != vehiclesData.length) {
-        let vechiclesToBeAdded = this.userData.vehiclesOwned;
         for (let vehicle of vehiclesData) {
           let isVehicleOwned = this.userData.vehiclesOwned.some(
             (userVehicle) => userVehicle.name === vehicle.name
@@ -116,9 +137,8 @@ export default {
             });
           }
         }
-        return vechiclesToBeAdded;
       }
-      return [];
+      return vechiclesToBeAdded;
     },
 
     //SETTER for stage
@@ -209,16 +229,30 @@ export default {
       this.userData = userData;
     },
   },
-  mounted() {
+  async mounted() {
     this.auth = getAuth();
-    onAuthStateChanged(this.auth, (user) => {
+    onAuthStateChanged(this.auth, async (user) => {
+      this.refresh();
+
+      this.userData = null;
+      await nextTick();
       if (!user) {
         this.loggedIn = false;
-        this.fetchUser();
+        this.userData = this.guestUser;
+
+        await this.fetchUser();
       } else {
-        this.currentUserDocRef = doc(db, "users", this.auth.currentUser.uid);
         this.loggedIn = true;
-        this.refresh();
+        this.currentUserDocRef = doc(db, "users", this.auth.currentUser.uid);
+        const docSnap = await getDoc(
+          doc(db, "users", this.auth.currentUser.uid)
+        );
+        if (docSnap.exists()) {
+          this.userData = docSnap.data();
+        } else {
+          console.log("No such document!");
+        }
+        await this.fetchUser();
       }
     });
   },
@@ -226,7 +260,7 @@ export default {
 </script>
 
 <template>
-  <div class="container" v-if="userData">
+  <div class="container" v-if="contentLoaded">
     <PomodoroDollarsEarned
       :visable="showMoneyEarned"
       :earnedAmount="userData.settings.focus"
@@ -235,6 +269,7 @@ export default {
       :show="showAccountPopUp"
       @toggleAccount="toggleAccount"
       @refresh="refresh"
+      @login="login"
     />
     <NavItem
       :loggedIn="loggedIn"
@@ -252,6 +287,7 @@ export default {
       @toggleSettings="toggleSettings"
       @updateSettings="updateSettings"
       @refresh="refresh"
+      @logout="logout"
     />
     <ShopPopup
       :showShop

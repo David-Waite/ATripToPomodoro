@@ -1,5 +1,5 @@
 <script setup>
-import { deleteUser, signOut } from "firebase/auth";
+import { deleteUser } from "firebase/auth";
 import PopupCard from "../components/UI/PopupCard.vue";
 import { BIconXCircle } from "bootstrap-icons-vue";
 import { deleteDoc, doc, getFirestore } from "firebase/firestore";
@@ -47,8 +47,7 @@ export default {
     },
 
     handleSignOut() {
-      signOut(this.auth);
-      this.$emit("refresh");
+      this.$emit("logout");
     },
 
     async handleDelete() {
