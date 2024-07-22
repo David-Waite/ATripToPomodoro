@@ -81,18 +81,6 @@ export default {
       this.showSettings = false;
       this.showShop = false;
       this.showAccountPopUp = false;
-      // if (!this.loggedIn) {
-      //   console.log("hello");
-      //   let newUserData = this.userData;
-      //   this.userData = null;
-
-      //   setTimeout(() => {
-      //     this.userData = newUserData;
-      //   }, 1);
-      //   return;
-      // }
-      // this.userData = null;
-      // this.fetchUser();
     },
     // getting current users data
     async fetchUser() {
@@ -154,11 +142,8 @@ export default {
 
       if (this.loggedIn) {
         await updateDoc(this.currentUserDocRef, { timeStudying: timeStudying });
-        this.fetchUser();
-      } else {
-        this.userData.timeStudying = timeStudying;
       }
-
+      this.userData.timeStudying = timeStudying;
       this.showMoneyEarned = true;
       setTimeout(() => {
         this.showMoneyEarned = false;
@@ -177,15 +162,12 @@ export default {
             this.userData.timeStudying - vehicle.price;
           if (!this.loggedIn) {
             return;
-          } else {
-            await updateDoc(this.currentUserDocRef, {
-              vehiclesOwned: this.userData.vehiclesOwned,
-              timeStudying: this.userData.timeStudying,
-            });
           }
+          await updateDoc(this.currentUserDocRef, {
+            vehiclesOwned: this.userData.vehiclesOwned,
+            timeStudying: this.userData.timeStudying,
+          });
         }
-
-        this.fetchUser(this.auth.currentUser);
       }
     },
     //Equipping vehicle (firestore)
@@ -211,15 +193,14 @@ export default {
     async updateSettings(settings) {
       console.log(settings);
 
-      if (!this.loggedIn) {
-        this.userData.settings = settings;
-      } else {
+      if (this.loggedIn) {
         await updateDoc(this.currentUserDocRef, {
           settings: settings,
         });
       }
-
+      this.userData.settings = { ...settings };
       this.refresh();
+      this.$forceUpdate();
     },
   },
 

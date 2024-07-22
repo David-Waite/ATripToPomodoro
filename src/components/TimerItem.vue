@@ -103,6 +103,19 @@ export default {
   computed: {},
 
   watch: {
+    settings: function (newSetting) {
+      this.stopTimer();
+      this.strokeDashArray = 283;
+      this.startingTime = newSetting.focus;
+      this.time = newSetting.focus;
+      this.intervalId = null;
+      this.shortRest = newSetting.shortRest;
+      this.longRest = newSetting.longRest;
+      this.pomodoroTillLongRest = newSetting.focusTilLongRest;
+      this.pomodoroTillLongRestSetting = newSetting.focusTilLongRest;
+      this.focus = newSetting.focus;
+      this.current = "pomodoro";
+    },
     time: function (newTime) {
       let rawTimeFraction = newTime / this.startingTime;
 
