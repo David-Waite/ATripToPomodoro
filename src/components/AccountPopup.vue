@@ -1,13 +1,11 @@
 <script setup>
-import db from "@/main";
 import { BIconXCircle } from "bootstrap-icons-vue";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
 </script>
 <script>
 export default {
   props: {
     show: Boolean,
+    accountError: Object,
   },
   data() {
     return {
@@ -20,44 +18,14 @@ export default {
     };
   },
   methods: {
-    async registerUser() {
-      try {
-        this.auth = getAuth();
-        // Use Firebase authentication API to create a new user
-        await createUserWithEmailAndPassword(
-          this.auth,
-          this.email,
-          this.password
-        );
-
-        // Redirect to the home page or another route
-        const userRef = doc(db, "users", this.auth.currentUser.uid);
-        // Example: Add user-specific data
-        await setDoc(userRef, {
-          username: this.username,
-          email: this.email,
-          settings: {
-            focus: 1500,
-            shortRest: 300,
-            longRest: 3600,
-            focusTilLongRest: 4,
-          },
-          timeStudying: 0,
-          vehiclesOwned: [
-            {
-              name: "Classic",
-              price: 0,
-              status: "equipped",
-            },
-          ],
-        });
-
-        // Other user properties}
-
-        this.$emit("refresh");
-      } catch (error) {
-        console.error("Error creating user:", error);
-      }
+    registerUser() {
+      this.$emit(
+        "register",
+        this.email,
+        this.password,
+        this.confirmPassword,
+        this.username
+      );
     },
     async loginUser() {
       this.$emit("login", this.email, this.password);
@@ -89,7 +57,33 @@ export default {
     },
   },
   computed: {},
-  watch: {},
+  watch: {
+    accountError: function (newError) {
+      switch (newError.error) {
+        case "auth/user-not-found":
+          this.errorMessage = "No account with that email found";
+          break;
+        case "auth/invalid-email":
+          this.errorMessage = "Invalid email address";
+          break;
+        case "auth/invalid-credential":
+          this.errorMessage = "Password was incorrect";
+          break;
+        case "auth/weak-password":
+          this.errorMessage = "Password less then 6 characters";
+          break;
+        case "auth/email-already-in-use":
+          this.errorMessage = "Eamil already in use";
+          break;
+        case "passwords-no-match":
+          this.errorMessage = "Passwords do not match";
+          break;
+        default:
+          this.errorMessage = "Something went wrong";
+          break;
+      }
+    },
+  },
   created() {},
   mounted() {},
 };
@@ -123,12 +117,25 @@ export default {
       </div>
     </div>
     <form action="#">
+      <p
+        class="errorMessage"
+        v-if="errorMessage && accountError.type == `login` && !register"
+      >
+        Error: {{ errorMessage }}
+      </p>
+      <p
+        class="errorMessage"
+        v-if="errorMessage && accountError.type == `register` && register"
+      >
+        Error: {{ errorMessage }}
+      </p>
+
       <div>
         <div v-if="register">
           <label for="email">Username</label>
           <input type="text" name="username" id="username" v-model="username" />
         </div>
-        <label for="email">Email</label>
+        <label for="email">Email </label>
         <input type="email" name="email" id="email" v-model="email" />
       </div>
 
@@ -158,6 +165,15 @@ export default {
 </template>
 
 <style scoped>
+.errorMessage {
+  color: var(--white);
+  background-color: var(--red);
+  text-align: center;
+  border-radius: 50px;
+  font-size: 16px;
+  margin: 8px 0;
+  padding: 4px;
+}
 .accountContainer {
   position: absolute;
   width: 640px;

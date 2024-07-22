@@ -1,8 +1,5 @@
 <script setup>
-import { deleteUser } from "firebase/auth";
-import PopupCard from "../components/UI/PopupCard.vue";
 import { BIconXCircle } from "bootstrap-icons-vue";
-import { deleteDoc, doc, getFirestore } from "firebase/firestore";
 </script>
 <script>
 export default {
@@ -43,6 +40,7 @@ export default {
       this.$emit("toggleSettings");
     },
     toggleDeletePopup() {
+      this.$emit("toggleDeleteAccountOverview");
       this.deletePopUp = !this.deletePopUp;
     },
 
@@ -50,26 +48,6 @@ export default {
       this.$emit("logout");
     },
 
-    async handleDelete() {
-      const db = getFirestore();
-      const user = this.auth.currentUser;
-      const uid = user.uid;
-
-      // Get a reference to the user's document in Firestore
-      const userDoc = doc(db, "users", uid);
-
-      try {
-        // Delete the user's document from Firestore
-        await deleteDoc(userDoc);
-        console.log("User document deleted successfully");
-
-        // Then delete the user's account
-        await deleteUser(user);
-        console.log("User account deleted successfully");
-      } catch (error) {
-        console.error("Error while deleting user account or document", error);
-      }
-    },
     convertTimeFormatToSeconds(time) {
       return time.hours * 3600 + time.minutes * 60 + time.seconds;
     },
@@ -80,7 +58,7 @@ export default {
 
       const updatedSettings = {
         focus: this.convertTimeFormatToSeconds(this.time.focus),
-        focusTilLongRest: this.time.focusTilLongRest,
+        focusTilLongRest: this.time.focusTilLongRest * 1,
         longRest: this.convertTimeFormatToSeconds(this.time.longRest),
         shortRest: this.convertTimeFormatToSeconds(this.time.shortRest),
       };
@@ -113,99 +91,80 @@ export default {
 };
 </script>
 <template>
-  <PopupCard v-if="showSettings">
-    <div class="deleteDimmer" v-if="deletePopUp"></div>
-    <div class="deletePopup" v-if="deletePopUp">
-      <h2 class="deleteText">
-        Are you sure you want to permanently delete your account?
-      </h2>
-      <div>
-        <button class="deleteBtn btn" @click="handleDelete">
-          DELETE ACCOUNT
-        </button>
-        <button class="signOutBtn btn" @click="toggleDeletePopup">
-          CANCEL
-        </button>
+  <div class="container" v-if="showSettings">
+    <div class="innerContainer">
+      <div class="header">
+        <h1>SETTINGS</h1>
+        <BIconXCircle @click="toggleSettings" />
       </div>
-    </div>
-    <div class="header">
-      <h2>Username: {{ loggedIn ? username : "Guest" }}</h2>
-      <h1>SETTINGS</h1>
-      <BIconXCircle @click="toggleSettings" />
-    </div>
+      <h3 class="username">Account: {{ username ? username : "Guest" }}</h3>
+      <div class="timerSettings">
+        <h3>Timer Settings</h3>
 
-    <div class="timerSettings">
-      <h3>Timer Settings</h3>
-
-      <div class="timeSettingContainer">
-        <h4>Focus:</h4>
-        <input id="focusHours" type="number" v-model="time.focus.hours" />
-        <label for="focusHours">h</label><span>:</span>
-        <input id="focusMinutes" type="number" v-model="time.focus.minutes" />
-        <label for="focusMinutes">m</label><span>:</span>
-        <input id="focusSeconds" type="number" v-model="time.focus.seconds" />
-        <label for="focusSeconds">s</label>
+        <div class="timeSettingContainer">
+          <h4>Focus:</h4>
+          <input id="focusHours" type="number" v-model="time.focus.hours" />
+          <label for="focusHours">h</label><span>:</span>
+          <input id="focusMinutes" type="number" v-model="time.focus.minutes" />
+          <label for="focusMinutes">m</label><span>:</span>
+          <input id="focusSeconds" type="number" v-model="time.focus.seconds" />
+          <label for="focusSeconds">s</label>
+        </div>
+        <div class="timeSettingContainer">
+          <h4>Short rest:</h4>
+          <input id="focusHours" type="number" v-model="time.shortRest.hours" />
+          <label for="focusHours">h</label><span>:</span>
+          <input
+            id="focusMinutes"
+            type="number"
+            v-model="time.shortRest.minutes"
+          />
+          <label for="focusMinutes">m</label><span>:</span>
+          <input
+            id="focusSeconds"
+            type="number"
+            v-model="time.shortRest.seconds"
+          />
+          <label for="focusSeconds">s</label>
+        </div>
+        <div class="timeSettingContainer">
+          <h4>Long rest:</h4>
+          <input id="focusHours" type="number" v-model="time.longRest.hours" />
+          <label for="focusHours">h</label><span>:</span>
+          <input
+            id="focusMinutes"
+            type="number"
+            v-model="time.longRest.minutes"
+          />
+          <label for="focusMinutes">m</label><span>:</span>
+          <input
+            id="focusSeconds"
+            type="number"
+            v-model="time.longRest.seconds"
+          />
+          <label for="focusSeconds">s</label>
+        </div>
+        <div class="focusTilLongRestContainer">
+          <label for="focusTilLongRest">Focus period's until long rest:</label>
+          <input
+            type="text"
+            id="focusTilLongRest"
+            v-model="time.focusTilLongRest"
+          />
+        </div>
       </div>
-      <div class="timeSettingContainer">
-        <h4>Short rest:</h4>
-        <input id="focusHours" type="number" v-model="time.shortRest.hours" />
-        <label for="focusHours">h</label><span>:</span>
-        <input
-          id="focusMinutes"
-          type="number"
-          v-model="time.shortRest.minutes"
-        />
-        <label for="focusMinutes">m</label><span>:</span>
-        <input
-          id="focusSeconds"
-          type="number"
-          v-model="time.shortRest.seconds"
-        />
-        <label for="focusSeconds">s</label>
-      </div>
-      <div class="timeSettingContainer">
-        <h4>Long rest:</h4>
-        <input id="focusHours" type="number" v-model="time.longRest.hours" />
-        <label for="focusHours">h</label><span>:</span>
-        <input
-          id="focusMinutes"
-          type="number"
-          v-model="time.longRest.minutes"
-        />
-        <label for="focusMinutes">m</label><span>:</span>
-        <input
-          id="focusSeconds"
-          type="number"
-          v-model="time.longRest.seconds"
-        />
-        <label for="focusSeconds">s</label>
-      </div>
-      <div class="focusTilLongRestContainer">
-        <label for="focusTilLongRest">Focus period's until long rest:</label>
-        <input
-          type="text"
-          id="focusTilLongRest"
-          v-model="time.focusTilLongRest"
-        />
-      </div>
-    </div>
-    <div class="audio">
-      <h3>Audio</h3>
-      <input type="checkbox" id="switch" class="checkbox" />
-      <label for="switch" class="toggle">
-        <p></p>
-      </label>
-    </div>
-
-    <div class="settingsFooter">
-      <div class="signOutBtnContainer" v-if="loggedIn">
-        <button class="signOutBtn btn" @click="handleSignOut">SIGN OUT</button>
-        <button class="deleteBtn btn" @click="toggleDeletePopup">
-          DELETE ACCOUNT
-        </button>
+      <div class="audio">
+        <h3>Audio</h3>
+        <input type="checkbox" id="switch" class="checkbox" />
+        <label for="switch" class="toggle">
+          <p></p>
+        </label>
       </div>
       <div class="saveContainer">
-        <p class="warning" v-if="settingChange">
+        <p
+          class="warning"
+          :style="!settingChange && { color: 'var(--background)' }"
+        >
           Warning: Updating timer settings will cause the timer to reset
         </p>
         <button
@@ -216,28 +175,52 @@ export default {
           SAVE CHANGES
         </button>
       </div>
+
+      <div class="signOutBtnContainer" v-if="loggedIn">
+        <button class="signOutBtn btn" @click="handleSignOut">SIGN OUT</button>
+        <button class="deleteBtn btn" @click="toggleDeletePopup">
+          DELETE ACCOUNT
+        </button>
+      </div>
     </div>
-  </PopupCard>
+  </div>
 </template>
 
 <style scoped>
+.container {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--background);
+  border: 4px solid var(--backgroundBorder);
+  border-radius: 40px;
+  padding: 24px;
+  max-width: 440px;
+}
+.innerContainer {
+  width: 100%;
+}
+
 .header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 60px;
+  margin-bottom: 32px;
 }
 .header h1 {
-  position: absolute;
-
-  left: 50%;
-  transform: translateX(-50%);
+  text-align: center;
+  font-size: 24px;
+  color: var(--textPrimary);
 }
+
 .header svg {
+  position: absolute;
+  right: 40px;
+  top: 28px;
   cursor: pointer;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--textPrimary);
 }
-
 .header h1,
 .header h2,
 .header svg {
@@ -248,8 +231,12 @@ export default {
 
 h3 {
   font-size: 20px;
+
   font-weight: 500;
   color: var(--textPrimary);
+}
+.username {
+  margin-bottom: 24px;
 }
 
 .timerSettings {
@@ -325,7 +312,7 @@ h3 {
   text-align: center;
 }
 .audio {
-  margin-top: 60px;
+  margin: 24px 0 16px 0;
   display: flex;
   gap: 16px;
   align-items: center;
@@ -371,8 +358,6 @@ h3 {
 
 .settingsFooter {
   position: relative;
-  margin-top: auto;
-  display: flex;
 }
 .btn {
   cursor: pointer;
@@ -390,27 +375,26 @@ h3 {
 }
 .signOutBtnContainer {
   display: flex;
-  flex-direction: column;
   gap: 8px;
 }
+
 .saveContainer {
-  align-self: flex-end;
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
+  margin-bottom: 8px;
 }
+
 .signOutBtn {
+  width: 100%;
   background-color: var(--grey);
 }
 .deleteBtn {
+  width: 100%;
   background-color: var(--red);
 }
 .saveBtn {
+  width: 100%;
   background-color: var(--green);
 }
 .disabled {
@@ -429,39 +413,6 @@ h3 {
   color: var(--red);
   font-weight: 600;
   text-align: center;
-}
-.deletePopup {
-  position: absolute;
-  z-index: 7;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: var(--background);
-  border: 4px solid var(--backgroundBorder);
-  border-radius: 40px;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-.deletePopup div {
-  display: flex;
-  gap: 16px;
-}
-.deleteDimmer {
-  position: absolute;
-  z-index: 6;
-  background-color: rgba(0, 0, 0, 0.518);
-  border: 4px solid var(--backgroundBorder);
-  width: 98vw;
-  height: 95vh;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 40px;
-}
-.deleteText {
-  color: var(--black);
+  font-size: 12px;
 }
 </style>

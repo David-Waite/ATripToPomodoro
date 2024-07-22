@@ -1,12 +1,13 @@
 <script setup>
 import {
+  createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
 import LoopingBackground from "@/components/LoopingBackground.vue";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import db from "@/main";
 
 import TimerItem from "../components/TimerItem.vue";
@@ -16,6 +17,7 @@ import ShopPopup from "@/components/ShopPopup.vue";
 import PomodoroDollarsEarned from "@/components/UI/PomodoroDollarsEarned.vue";
 import AccountPopup from "@/components/AccountPopup.vue";
 import { nextTick } from "vue";
+import deleteAccountPopUp from "@/components/UI/deleteAccountPopUp.vue";
 </script>
 
 <script>
@@ -50,9 +52,17 @@ export default {
       stage: "start",
       showMoneyEarned: false,
       showAccountPopUp: false,
+      deleteAccountOverView: false,
+      accountError: {
+        type: "",
+        error: "",
+      },
     };
   },
   methods: {
+    toggleDeleteAccountOverview() {
+      this.deleteAccountOverView = !this.deleteAccountOverView;
+    },
     toggleAccount() {
       this.showAccountPopUp = !this.showAccountPopUp;
     },
@@ -63,13 +73,57 @@ export default {
       this.showShop = !this.showShop;
     },
     async login(email, password) {
-      this.contentLoaded = false;
       try {
         await signInWithEmailAndPassword(getAuth(), email, password);
       } catch (error) {
-        console.log(error.code);
+        this.accountError = {
+          type: "login",
+          error: error.code,
+        };
+      }
+    },
+    async register(email, password, confirmPassword, username) {
+      if (password != confirmPassword) {
+        this.accountError = {
+          type: "register",
+          error: "passwords-no-match",
+        };
+        return;
+      }
+      try {
+        this.auth = getAuth();
+        // Use Firebase authentication API to create a new user
+        await createUserWithEmailAndPassword(this.auth, email, password);
 
-        console.error("Error creating user:", error);
+        // Redirect to the home page or another route
+        const userRef = doc(db, "users", this.auth.currentUser.uid);
+        // Example: Add user-specific data
+        await setDoc(userRef, {
+          username: username,
+          email: email,
+          settings: {
+            focus: 1500,
+            shortRest: 300,
+            longRest: 3600,
+            focusTilLongRest: 4,
+          },
+          timeStudying: 0,
+          vehiclesOwned: [
+            {
+              name: "Classic",
+              price: 0,
+              status: "equipped",
+            },
+          ],
+        });
+
+        // Other user properties}
+        this.$emit("login", email, password);
+      } catch (error) {
+        this.accountError = {
+          type: "register",
+          error: error.code,
+        };
       }
     },
     async logout() {
@@ -214,6 +268,7 @@ export default {
     this.auth = getAuth();
     onAuthStateChanged(this.auth, async (user) => {
       this.refresh();
+      this.contentLoaded = false;
 
       this.userData = null;
       await nextTick();
@@ -241,6 +296,9 @@ export default {
 </script>
 
 <template>
+  <div v-if="!contentLoaded" class="loaderContainer">
+    <div class="loader"></div>
+  </div>
   <div class="container" v-if="contentLoaded">
     <PomodoroDollarsEarned
       :visable="showMoneyEarned"
@@ -248,9 +306,11 @@ export default {
     />
     <AccountPopup
       :show="showAccountPopUp"
+      :accountError="accountError"
       @toggleAccount="toggleAccount"
       @refresh="refresh"
       @login="login"
+      @register="register"
     />
     <NavItem
       :loggedIn="loggedIn"
@@ -269,6 +329,7 @@ export default {
       @updateSettings="updateSettings"
       @refresh="refresh"
       @logout="logout"
+      @toggleDeleteAccountOverview="toggleDeleteAccountOverview"
     />
     <ShopPopup
       :showShop
@@ -288,6 +349,19 @@ export default {
       />
     </div>
   </div>
+  <div class="deleteDimmer" v-if="deleteAccountOverView"></div>
+  <deleteAccountPopUp
+    v-if="deleteAccountOverView"
+    :deleteAccountOverView="deleteAccountOverView"
+    @toggleDeleteAccountOverview="toggleDeleteAccountOverview"
+  />
+  <!-- <div class="deletePopup" v-if="deleteAccountOverView">
+    <hp class="deleteText">
+      Are you sure you want to permanently delete your account?
+    </hp>
+    <button class="deleteBtn btn" @click="handleDelete">DELETE ACCOUNT</button>
+    <button class="signOutBtn btn" @click="toggleDeletePopup">CANCEL</button>
+  </div> -->
 </template>
 
 <style scoped>
@@ -303,5 +377,46 @@ export default {
   z-index: 2;
   top: 8vh;
   padding: 50px;
+}
+.deleteDimmer {
+  position: absolute;
+  z-index: 4;
+  background-color: rgba(0, 0, 0, 0.518);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 110vw;
+  height: 110vh;
+}
+.loaderContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 80px;
+  height: 70px;
+  border: 5px solid #000;
+  padding: 0 8px;
+  box-sizing: border-box;
+  background: linear-gradient(#fff 0 0) 0 0/8px 20px,
+    linear-gradient(#fff 0 0) 100% 0/8px 20px,
+    radial-gradient(farthest-side, #fff 90%, #0000) 0 5px/8px 8px content-box,
+    #000;
+  background-repeat: no-repeat;
+  animation: l3 2s infinite linear;
+}
+@keyframes l3 {
+  25% {
+    background-position: 0 0, 100% 100%, 100% calc(100% - 5px);
+  }
+  50% {
+    background-position: 0 100%, 100% 100%, 0 calc(100% - 5px);
+  }
+  75% {
+    background-position: 0 100%, 100% 0, 100% 5px;
+  }
 }
 </style>

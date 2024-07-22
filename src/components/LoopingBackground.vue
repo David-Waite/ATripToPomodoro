@@ -46,9 +46,14 @@ import TheGhostStill from "../assets/images/vehicles/ghost/ghostStill.png";
       :alt="getEquippedVehicleName()"
     />
   </div>
-  <a target="_blank" class="animator" href="https://www.cassiefleming.com/"
-    >Animated by Cassie Flemming</a
-  >
+  <p class="credits">
+    <a target="_blank" href="https://www.cassiefleming.com/"
+      >Artist: Cassie Fleming</a
+    >&nbsp;|&nbsp;
+    <a target="_blank" href="https://www.davidwaitedev.com/"
+      >Developer: David Waite</a
+    >
+  </p>
 </template>
 
 <script>
@@ -74,17 +79,21 @@ export default {
 </script>
 
 <style scoped>
-.animator {
+.credits {
   position: absolute;
   bottom: 20px;
   display: flex;
   right: 40px;
 
   color: var(--white);
-  text-decoration: none;
+
   font-weight: 100;
   font-size: 12px;
   z-index: 3;
+}
+.credits a {
+  text-decoration: none;
+  color: var(--white);
 }
 .outerContainer {
   display: flex;
