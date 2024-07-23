@@ -178,9 +178,9 @@ export default {
 
       <div class="signOutBtnContainer" v-if="loggedIn">
         <button class="signOutBtn btn" @click="handleSignOut">SIGN OUT</button>
-        <button class="deleteBtn btn" @click="toggleDeletePopup">
+        <!-- <button class="deleteBtn btn" @click="toggleDeletePopup">
           DELETE ACCOUNT
-        </button>
+        </button> -->
       </div>
     </div>
   </div>
