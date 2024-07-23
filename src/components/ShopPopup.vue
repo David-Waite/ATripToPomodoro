@@ -124,9 +124,12 @@ h2 {
   font-weight: 500;
 }
 .categoryContainer {
-  overflow-y: scroll;
+  overflow-y: hidden;
+  overflow-x: scroll;
   display: flex;
   gap: 16px;
+  scrollbar-color: var(--textPrimary) var(--background);
+  scrollbar-width: thin;
   margin: 16px 0;
 }
 .itemCard {
