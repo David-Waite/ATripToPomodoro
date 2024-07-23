@@ -28,16 +28,15 @@ export default {
 <template>
   <PopupCard v-if="showShop">
     <div class="header">
-      <div class="coinContainer">
-        <img src="../assets/images/pomodoroCoin.png" alt="pomodoroCoins" />
-        <p>
-          {{ userData.timeStudying }}
-        </p>
-      </div>
-
       <h1>SHOP</h1>
       <BIconXCircle @click="toggleShop" />
     </div>
+    <div class="coinContainer">
+      <h2>Balance:</h2>
+      <img src="../assets/images/pomodoroCoin.png" alt="pomodoroCoins" />
+      <h2>{{ userData.timeStudying }}</h2>
+    </div>
+
     <h2 class="categoryHeading">Vehicles:</h2>
     <div class="categoryContainer">
       <div
@@ -85,16 +84,19 @@ export default {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+
   margin-bottom: 60px;
 }
 .header h1 {
+  text-align: center;
   position: absolute;
 
   left: 50%;
   transform: translateX(-50%);
 }
 .header svg {
+  position: absolute;
+  right: 0;
   cursor: pointer;
 }
 
@@ -110,16 +112,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 16px;
 }
 .coinContainer img {
   height: 30px;
 }
-.categoryHeading {
+.categoryHeading,
+h2 {
   font-size: 24px;
   color: var(--textPrimary);
   font-weight: 500;
 }
 .categoryContainer {
+  overflow-y: scroll;
   display: flex;
   gap: 16px;
   margin: 16px 0;

@@ -36,7 +36,6 @@ export default {
       <div
         :class="!loggedIn ? 'iconContainerLoggedIn' : 'iconContainerLoggedOut'"
       >
-        <h2 v-if="loggedIn">Welcome {{ username }}</h2>
         <button v-if="!loggedIn">
           <BIconPersonCircle @click="toggleAccount" />
         </button>

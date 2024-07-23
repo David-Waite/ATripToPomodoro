@@ -168,4 +168,13 @@ export default {
     transform: translateX(-50%);
   }
 }
+@media (max-width: 600px) {
+  .credits {
+    align-items: center;
+    justify-content: center;
+
+    right: inherit;
+    font-size: 11px;
+  }
+}
 </style>

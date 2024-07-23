@@ -89,7 +89,11 @@ export default {
 };
 </script>
 <template>
-  <div class="accountContainer" v-if="show">
+  <div
+    class="accountContainer"
+    v-if="show"
+    :style="register ? { top: '50%' } : { top: 'calc(50% - 80px)' }"
+  >
     <div class="header">
       <h1>Sign in or create an account</h1>
 
@@ -176,10 +180,11 @@ export default {
 }
 .accountContainer {
   position: absolute;
-  width: 640px;
+  max-width: 640px;
+  width: 100%;
 
   z-index: 5;
-  top: 50%;
+
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: var(--background);
@@ -195,6 +200,7 @@ export default {
   text-align: center;
   font-size: 24px;
   color: var(--textPrimary);
+  padding: 0 40px;
 }
 
 .header svg {
@@ -312,5 +318,10 @@ form button {
   color: var(--white);
   border: none;
   background-color: var(--green);
+}
+@media (max-width: 600px) {
+  .header h1 {
+    font-size: 20px;
+  }
 }
 </style>
