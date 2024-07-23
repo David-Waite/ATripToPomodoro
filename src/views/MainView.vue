@@ -26,7 +26,7 @@ export default {
     return {
       contentLoaded: false,
       guestUser: {
-        timeStudying: 5000,
+        timeStudying: 0,
         username: null,
         vehiclesOwned: [
           {
@@ -139,7 +139,6 @@ export default {
     // getting current users data
     async fetchUser() {
       if (!this.loggedIn) {
-        console.log("got here");
         this.userData.vehiclesOwned = await this.checkForVehiclesToAdd();
         this.contentLoaded = true;
         return;
@@ -245,8 +244,6 @@ export default {
       });
     },
     async updateSettings(settings) {
-      console.log(settings);
-
       if (this.loggedIn) {
         await updateDoc(this.currentUserDocRef, {
           settings: settings,
@@ -285,8 +282,6 @@ export default {
         );
         if (docSnap.exists()) {
           this.userData = docSnap.data();
-        } else {
-          console.log("No such document!");
         }
         await this.fetchUser();
       }
@@ -355,13 +350,6 @@ export default {
     :deleteAccountOverView="deleteAccountOverView"
     @toggleDeleteAccountOverview="toggleDeleteAccountOverview"
   />
-  <!-- <div class="deletePopup" v-if="deleteAccountOverView">
-    <hp class="deleteText">
-      Are you sure you want to permanently delete your account?
-    </hp>
-    <button class="deleteBtn btn" @click="handleDelete">DELETE ACCOUNT</button>
-    <button class="signOutBtn btn" @click="toggleDeletePopup">CANCEL</button>
-  </div> -->
 </template>
 
 <style scoped>

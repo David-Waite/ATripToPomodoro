@@ -18,16 +18,20 @@ import { BIconPause, BIconPlay, BIconStop } from "bootstrap-icons-vue";
       </p>
       <div class="buttonContiainer">
         <button v-if="stage == 'start'" @click="startTimer">
+          <p>play</p>
           <BIconPlay />
         </button>
         <button v-if="stage == 'running'" @click="pauseTimer">
+          <p>pause</p>
           <BIconPause />
         </button>
         <div class="pauseStopContainer">
           <button v-if="stage == 'paused'" @click="unpauseTimer">
+            <p>unpause</p>
             <BIconPlay />
           </button>
           <button v-if="stage == 'paused'" @click="stopTimer">
+            <p>stop</p>
             <BIconStop />
           </button>
         </div>
@@ -240,6 +244,9 @@ export default {
   color: var(--white);
   font-size: 20px;
   font-weight: 500;
+}
+button p {
+  display: none;
 }
 button {
   background-color: transparent;

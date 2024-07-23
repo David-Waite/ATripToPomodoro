@@ -37,15 +37,18 @@ export default {
         :class="!loggedIn ? 'iconContainerLoggedIn' : 'iconContainerLoggedOut'"
       >
         <button v-if="!loggedIn">
+          <p>login or sign up</p>
           <BIconPersonCircle @click="toggleAccount" />
         </button>
         <button>
+          <p>shop</p>
           <BIconShop @click="toggleShop" />
         </button>
       </div>
 
       <div>
         <button>
+          <p>setting</p>
           <BIconGearFill @click="toggleSettings" />
         </button>
       </div>
@@ -59,7 +62,9 @@ export default {
   top: 0;
   z-index: 3;
 }
-
+.navContainer button p {
+  display: none;
+}
 .navContainer {
   width: 100vw;
   background-color: linear-gradient(

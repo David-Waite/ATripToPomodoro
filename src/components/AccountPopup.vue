@@ -29,31 +29,6 @@ export default {
     },
     async loginUser() {
       this.$emit("login", this.email, this.password);
-      // try {
-      //   // Use Firebase authentication API to create a new user
-      //   await signInWithEmailAndPassword(getAuth(), this.email, this.password);
-      //   // Redirect to the home page or another route
-
-      //   this.$emit("refresh");
-      // } catch (error) {
-      //   console.log(error.code);
-      //   switch (error.code) {
-      //     case "auth/user-not-found":
-      //       this.errorMessage = "No account with that email found";
-      //       break;
-      //     case "auth/invalid-email":
-      //       this.errorMessage = "Invalid email address";
-      //       break;
-      //     case "auth/invalid-credential":
-      //       this.errorMessage = "Password was incorrect";
-      //       break;
-      //     default:
-      //       this.errorMessage = "Something went wrong";
-      //       break;
-      //   }
-
-      //   console.error("Error creating user:", error);
-      // }
     },
   },
   computed: {},
