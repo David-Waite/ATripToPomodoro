@@ -362,7 +362,7 @@ export default {
 }
 .timerContainer {
   position: absolute;
-  z-index: 2;
+  z-index: 4;
   top: 8vh;
   padding: 50px;
 }
