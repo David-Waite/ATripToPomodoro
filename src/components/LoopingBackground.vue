@@ -105,6 +105,7 @@ export default {
   height: 40vh;
   left: 50vw;
   transform: translateX(-50%);
+  z-index: 2;
 }
 .vehicleMoving {
   height: 30vh;
@@ -116,20 +117,21 @@ export default {
   animation: studyTimeForeground 9s linear infinite;
   transform: translateX(-100%);
   position: relative;
-  z-index: 1;
+  z-index: 3;
   top: 0;
 }
 .background {
   animation: studyTimeBackground 9s linear infinite;
+  z-index: 2;
 }
 
 .imageBackface {
   position: absolute;
-  z-index: -1;
+  z-index: 1;
   height: 100vh;
+
   top: 0;
   left: 0;
-  display: none;
 }
 .outerContainer {
   position: absolute;
