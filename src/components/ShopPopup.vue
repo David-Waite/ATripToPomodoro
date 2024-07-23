@@ -188,4 +188,9 @@ h2 {
 .equip:hover {
   background-color: #919191;
 }
+@media (max-width: 600px) {
+  .header {
+    top: 16px;
+  }
+}
 </style>

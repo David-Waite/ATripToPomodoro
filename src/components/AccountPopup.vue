@@ -322,6 +322,13 @@ form button {
 @media (max-width: 600px) {
   .header h1 {
     font-size: 20px;
+    padding: 0 32px;
+  }
+  .header svg {
+    right: 16px;
+  }
+  .accountContainer {
+    padding: 16px;
   }
 }
 </style>

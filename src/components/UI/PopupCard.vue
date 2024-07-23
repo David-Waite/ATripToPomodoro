@@ -22,4 +22,11 @@
   display: flex;
   flex-direction: column;
 }
+@media (max-width: 600px) {
+  .popUpContainer {
+    width: 100vw;
+    padding: 16px;
+    height: 90vh;
+  }
+}
 </style>

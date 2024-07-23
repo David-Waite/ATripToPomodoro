@@ -415,4 +415,16 @@ h3 {
   text-align: center;
   font-size: 12px;
 }
+@media (max-width: 600px) {
+  .header h1 {
+    font-size: 20px;
+    padding: 0 32px;
+  }
+  .header svg {
+    right: 16px;
+  }
+  .container {
+    padding: 16px;
+  }
+}
 </style>

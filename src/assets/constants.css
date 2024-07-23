@@ -81,8 +81,10 @@
 
 body {
   font-family: RobotoMono;
+  height: 100lvh;
   font-weight: 400;
   overflow: hidden;
+  background-color: #cf593c;
 }
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
